@@ -7,4 +7,4 @@ module Main (main) where
     main :: IO ()
     main = do
         putStrLn "Henlo Scala"
-        render "Henlo Lambda" 640 480
+        orchestrate "Henlo Lambda" 640 480
