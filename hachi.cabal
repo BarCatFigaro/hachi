@@ -20,7 +20,7 @@ executable hachi
   other-modules:       Renderer,
                        Game
   -- other-extensions:    
-  build-depends:       base >=4.9 && <4.10,
+  build-depends:       base >=4.9 && <4.13,
                        sdl2,
                        sdl2-image,
                        text,
