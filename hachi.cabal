@@ -8,7 +8,7 @@ version:             0.1.0.0
 license:             MIT
 license-file:        LICENSE
 author:              Albert Yip, Christine Song
-maintainer:          albertkaiyip@gmail.com, christinesong101@gmail.com
+maintainer:          albertkaiyip@gmail.com, christine.song.101@gmail.com
 -- copyright:           
 category:            Game
 build-type:          Simple
@@ -17,14 +17,10 @@ cabal-version:       >=1.10
 
 executable hachi
   main-is:             Main.hs
-  other-modules:       Renderer,
-                       Game
+  other-modules:       Graphics,
+                       Types
   -- other-extensions:    
-  build-depends:       base >=4.9 && <4.13,
-                       sdl2,
-                       sdl2-image,
-                       text,
-                       extra,
-                       linear
+  build-depends:       base,
+                       FunGEn
   hs-source-dirs:      src
   default-language:    Haskell2010
