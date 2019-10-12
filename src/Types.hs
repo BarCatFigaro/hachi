@@ -25,7 +25,7 @@ module Types(
     dogSize = (192, 192)
 
     dogSpeed :: Double
-    dogSpeed = 20.0
+    dogSpeed = 30.0
 
     gravity :: Double
     gravity = 1.0
@@ -85,7 +85,10 @@ module Types(
         setGameAttribute (GameAttribute score True)
         dog <- findObject "dog" "dogGroup"
         (vX, vY) <- getObjectSpeed dog
-        when (vY <= 0) (setObjectSpeed (vX, dogSpeed) dog)
+        setObjectSpeed (vX, newSpeed vY) dog
+        where newSpeed vY
+                | vY == 0 = dogSpeed
+                | otherwise = vY
 
     stop :: Dog -> Double -> GameAction ()
     stop dog vX = do
