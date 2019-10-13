@@ -4,8 +4,11 @@ module Types(
     GameAction,
     GameAttribute(GameAttribute),
     Dog,
+    Obstacle,
     dog,
-    windowSize
+    windowSize,
+    startPos,
+    GameState(GameOver, GameCont),
 ) where
 
     import Graphics.UI.Fungen
@@ -14,9 +17,13 @@ module Types(
 
     type Dog = GameObject ()
 
-    data GameAttribute = GameAttribute Int Bool
+    type Obstacle = GameObject ()
 
-    type GameAction a = IOGame GameAttribute () () () a
+    data GameAttribute = GameAttribute Int Bool Int
+
+    data GameState = GameOver | GameCont
+
+    type GameAction a = IOGame GameAttribute () GameState () a
 
     windowSize :: (Int, Int)
     windowSize = (1920, 1200)
@@ -42,16 +49,40 @@ module Types(
     initDog :: String -> ObjectPicture -> Bool -> (Double, Double) -> (Double, Double) -> Dog
     initDog name pic isAsleep pos speed = object name pic isAsleep pos speed ()
 
+    -- TODO should use dogState in initialization --
     dog :: Dog
     dog = initDog "dog" (initDogPicture dogSize 0)  False startPos (0, 0)
 
 
-    dogCycle :: Bool -> GameAction ()
-    dogCycle isJump = do
+    dogCycle :: GameAction ()
+    dogCycle = do
         dog <- findObject "dog" "dogGroup"
-        (GameAttribute score isJump) <- getGameAttribute
+        (GameAttribute score isJump dogState) <- getGameAttribute
         (_, vY) <- getObjectSpeed dog
+        setObjectCurrentPicture ((dogState + 1) `mod` 4) dog
+        setGameAttribute (GameAttribute score isJump ((dogState + 1) `mod` 4))
         when (isJump) (handleMotion dog vY)
+        handleCollision
+
+    
+    -- TODO to handle collision with finer granularity, we must crop the images and reduce the image sizes --
+    handleCollision :: GameAction ()
+    handleCollision = do
+        dog <- findObject "dog" "dogGroup"
+        obstacles <- getObjectsFromGroup "obstacleGroup"
+        obstacleCollision <- objectListObjectCollision obstacles dog
+        when
+            (obstacleCollision)
+            (do setObjectSpeed (0, 0) dog
+                stopMovingObs obstacles
+                setGameState GameOver)
+
+
+    stopMovingObs :: [Obstacle] -> GameAction ()
+    stopMovingObs [] = return ()
+    stopMovingObs (x:xs) = do
+        setObjectSpeed (0, 0) x
+        stopMovingObs xs
 
     handleMotion :: Dog -> Double -> GameAction ()
     handleMotion dog vY
@@ -79,10 +110,10 @@ module Types(
             then stop dog vX
             else setObjectSpeed (vX, vY - gravity) dog
 
-    jump :: Modifiers -> Position -> GameAction ()
-    jump _ _ = do
-        (GameAttribute score _) <- getGameAttribute
-        setGameAttribute (GameAttribute score True)
+    jump :: GameAction ()
+    jump = do
+        (GameAttribute score _ dogState) <- getGameAttribute
+        setGameAttribute (GameAttribute score True dogState)
         dog <- findObject "dog" "dogGroup"
         (vX, vY) <- getObjectSpeed dog
         setObjectSpeed (vX, newSpeed vY) dog
@@ -92,6 +123,6 @@ module Types(
 
     stop :: Dog -> Double -> GameAction ()
     stop dog vX = do
-        (GameAttribute score _) <- getGameAttribute
-        setGameAttribute (GameAttribute score False)
+        (GameAttribute score _ dogState) <- getGameAttribute
+        setGameAttribute (GameAttribute score False dogState)
         setObjectSpeed (vX, 0) dog

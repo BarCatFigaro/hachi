@@ -7,8 +7,9 @@ module Graphics where
     
     magenta = color 255 0 255
     pictures = [
-        ("./assets/dog/dog004.bmp", magenta),
-        ("./assets/dog/tile000.bmp", Nothing),
-        ("./assets/dog/tile012.bmp", Nothing),
-        ("./assets/dog/tile004.bmp", Nothing),
+        ("./assets/dog/tile004.bmp", magenta),
+        ("./assets/dog/tile005.bmp", magenta),
+        ("./assets/dog/tile006.bmp", magenta),
+        ("./assets/dog/tile007.bmp", magenta),
+        ("./assets/dog/tile004.bmp", magenta),
         ("./assets/world/background.bmp", Nothing)]
