@@ -32,4 +32,4 @@ module Main (main) where
                obstacleGroup = objectGroup "obstacleGroup" [obstacle]
                initAttr = GameAttribute 0 False 0
                input = [(MouseButton LeftButton, Press, handlePress)]
-            in funInit winConfig gameMap [dogGroup, obstacleGroup] GameCont initAttr input gameCycle (Timer 40) pictures
+            in funInit winConfig gameMap [dogGroup, obstacleGroup] GameCont initAttr input gameCycle (Timer 500) pictures

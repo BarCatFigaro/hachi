@@ -13,7 +13,7 @@ module Types(
 
     import Graphics.UI.Fungen
     
-    import Graphics (pictures)
+    import Graphics
 
     type Dog = GameObject ()
 
@@ -53,19 +53,17 @@ module Types(
     dog :: Dog
     dog = initDog "dog" (initDogPicture dogSize 0)  False startPos (0, 0)
 
-
     dogCycle :: GameAction ()
     dogCycle = do
         dog <- findObject "dog" "dogGroup"
         (GameAttribute score isJump dogState) <- getGameAttribute
         (_, vY) <- getObjectSpeed dog
         setObjectCurrentPicture ((dogState + 1) `mod` 4) dog
+        replaceObject dog (updateObjectSize $ getDogSize $ (dogState + 1) `mod` 4)
         setGameAttribute (GameAttribute score isJump ((dogState + 1) `mod` 4))
         when (isJump) (handleMotion dog vY)
         handleCollision
 
-    
-    -- TODO to handle collision with finer granularity, we must crop the images and reduce the image sizes --
     handleCollision :: GameAction ()
     handleCollision = do
         dog <- findObject "dog" "dogGroup"
@@ -76,7 +74,6 @@ module Types(
             (do setObjectSpeed (0, 0) dog
                 stopMovingObs obstacles
                 setGameState GameOver)
-
 
     stopMovingObs :: [Obstacle] -> GameAction ()
     stopMovingObs [] = return ()
