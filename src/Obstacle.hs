@@ -6,6 +6,12 @@ module Obstacle where
     import Types
     import Graphics
 
+    obstacleName :: String
+    obstacleName = "ball"
+
+    powerUpName :: String
+    powerUpName = "power"
+
     initObsSize :: (Double, Double)
     initObsSize = (30, 30)
 
@@ -20,7 +26,12 @@ module Obstacle where
     createObstacle :: Int -> IO Obstacle
     createObstacle n = do
         obsPosY <- mObsPosY
-        return $ object "ball" (initPicture initObsSize (n + 4)) False (obsPosX, obsPosY) (-45, 0) ()
+        k <- randomRIO (1, 2 :: Int)
+        return $ object (name k) (initPicture initObsSize (idx k n)) False (obsPosX, obsPosY) (-45, 0) ()
+        where
+            isPower k = k == 2
+            name k = if isPower k then powerUpName else obstacleName
+            idx k n = if isPower k then n + 8 else n + 4
 
     createObstacles :: Int -> IO [Obstacle]
     createObstacles 0 = return []

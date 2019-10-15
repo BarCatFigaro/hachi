@@ -6,6 +6,7 @@ module Types(
     Dog,
     maxHeight,
     Obstacle,
+    PowerUp,
     createDog,
     initPicture,
     windowSize,
@@ -20,6 +21,8 @@ module Types(
     type Dog = GameObject ()
 
     type Obstacle = GameObject ()
+
+    type PowerUp = GameObject ()
 
     data GameAttribute = GameAttribute Int Bool Int
 
@@ -46,7 +49,7 @@ module Types(
     extraJumpHeight = fromIntegral $ snd windowSize `div` 16
 
     startPos :: (Double, Double)
-    startPos = (fromIntegral $ fst windowSize `div` 4, fromIntegral $snd windowSize `div` 8)
+    startPos = (fromIntegral $ fst windowSize `div` 4, fromIntegral $ snd windowSize `div` 8)
 
     initPicture :: (Double, Double) -> Int -> ObjectPicture
     initPicture (x, y) = Tex (x, y)
@@ -60,24 +63,33 @@ module Types(
     dogCycle :: GameAction ()
     dogCycle = do
         dog <- findObject "dog" "dogGroup"
+        obstacles <- getObjectsFromGroup "obstacleGroup"
         (GameAttribute score isJump dogState) <- getGameAttribute
         (_, vY) <- getObjectSpeed dog
         setObjectCurrentPicture ((dogState + 1) `mod` 4) dog
         replaceObject dog $ updateObjectSize $ getPicSize ((dogState + 1) `mod` 4) dogs
         setGameAttribute $ GameAttribute score isJump ((dogState + 1) `mod` 4)
         when isJump $ handleMotion dog vY
-        handleCollision
+        handleCollision obstacles
 
-    handleCollision :: GameAction ()
-    handleCollision = do
+    handleCollision :: [Obstacle] -> GameAction ()
+    handleCollision (x:xs) = do
         dog <- findObject "dog" "dogGroup"
-        obstacles <- getObjectsFromGroup "obstacleGroup"
-        obstacleCollision <- objectListObjectCollision obstacles dog
-        when
-            obstacleCollision
-            (do setObjectSpeed (0, 0) dog
+        obsName <- getObjectName x
+        hasCollided <- objectsCollision x dog
+        when (hasCollided) (handleCollisionHelper dog obsName)
+
+    handleCollisionHelper :: Dog -> String -> GameAction ()
+    handleCollisionHelper dog name = do
+        case name of
+            obstacleName -> do
+                setObjectSpeed (0, 0) dog
+                obstacles <- getObjectsFromGroup "obstacleGroup"
                 stopMovingObs obstacles
-                setGameState GameOver)
+                setGameState GameOver
+            powerUpName -> do
+                (vX, vY) <- getObjectSpeed dog
+                setObjectSpeed (vX, vY - 100) dog
 
     stopMovingObs :: [Obstacle] -> GameAction ()
     stopMovingObs [] = return ()

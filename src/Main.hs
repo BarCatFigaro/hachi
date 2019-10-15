@@ -44,10 +44,10 @@ module Main (main) where
     main = do
         obstacles <- createObstacles 1
         let winConfig = ((0, 0), windowSize, "hachi")
-        let gameMap = textureMap 8 1920 1200 1920.0 1200.0
+        let gameMap = textureMap (length pictures - 1) 1920 1200 1920.0 1200.0
         let dogGroup = objectGroup "dogGroup" [createDog]
         let obstacleGroup = objectGroup "obstacleGroup" obstacles
         let initAttr = GameAttribute 0 False 0
-        let input = [(MouseButton LeftButton, Press, handlePress)
+        let input = [(MouseButton LeftButton, Press, handlePress),
                      (MouseButton LeftButton, StillDown, handleLongPress)]
-            in funInit winConfig gameMap [dogGroup, obstacleGroup] GameCont initAttr input gameCycle (Timer 60) pictures
+            in funInit winConfig gameMap [dogGroup, obstacleGroup] GameCont initAttr input gameCycle (Timer 100) pictures

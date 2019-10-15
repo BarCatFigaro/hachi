@@ -17,6 +17,10 @@ module Graphics where
         getPicture 1 obstacles,
         getPicture 2 obstacles,
         getPicture 3 obstacles,
+        getPicture 0 powerUps,
+        getPicture 1 powerUps,
+        getPicture 2 powerUps,
+        getPicture 3 powerUps,
         ("./assets/world/background.bmp", Nothing)]
 
     dogs :: [InternalPicture]
@@ -32,6 +36,13 @@ module Graphics where
         ("./assets/dog/tile004.bmp", magenta, (30, 30)),
         ("./assets/dog/tile004.bmp", magenta, (30, 30)),
         ("./assets/dog/tile004.bmp", magenta, (30, 30))]
+
+    powerUps :: [InternalPicture]
+    powerUps = [
+        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30)),
+        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30)),
+        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30)),
+        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30))]
 
     getPicSize :: Int -> [InternalPicture] -> (Double, Double)
     getPicSize idx pics =
