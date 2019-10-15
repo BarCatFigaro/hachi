@@ -34,13 +34,16 @@ module Types(
     initDogSize = (201, 195)
 
     dogSpeed :: Double
-    dogSpeed = 30.0
+    dogSpeed = 40.0
 
     gravity :: Double
-    gravity = 1.0
+    gravity = 0.1
 
     maxHeight :: Double
     maxHeight = fromIntegral $ snd windowSize `div` 4
+
+    extraJumpHeight :: Double
+    extraJumpHeight = fromIntegral $ snd windowSize `div` 16
 
     startPos :: (Double, Double)
     startPos = (fromIntegral $ fst windowSize `div` 4, fromIntegral $snd windowSize `div` 8)
@@ -91,7 +94,7 @@ module Types(
     jumping dog = do
         (vX, vY) <- getObjectSpeed dog
         (_, pY) <- getObjectPosition dog
-        if pY >= maxHeight
+        if pY >= (maxHeight + extraJumpHeight)
             then reverseYSpeed dog
             else setObjectSpeed (vX, newSpeed vY) dog
             where newSpeed vY
