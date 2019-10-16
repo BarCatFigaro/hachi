@@ -4,8 +4,11 @@ module Types(
     GameAction,
     GameAttribute(GameAttribute),
     Dog,
+    maxHeight,
     Obstacle,
-    dog,
+    PowerUp,
+    createDog,
+    initPicture,
     windowSize,
     startPos,
     GameState(GameOver, GameCont),
@@ -19,6 +22,8 @@ module Types(
 
     type Obstacle = GameObject ()
 
+    type PowerUp = GameObject ()
+
     data GameAttribute = GameAttribute Int Bool Int
 
     data GameState = GameOver | GameCont
@@ -28,52 +33,63 @@ module Types(
     windowSize :: (Int, Int)
     windowSize = (1920, 1200)
 
-    dogSize :: (Double, Double)
-    dogSize = (192, 192)
+    initDogSize :: (Double, Double)
+    initDogSize = (201, 195)
 
     dogSpeed :: Double
-    dogSpeed = 30.0
+    dogSpeed = 40.0
 
     gravity :: Double
-    gravity = 1.0
+    gravity = 0.1
 
     maxHeight :: Double
-    maxHeight = fromIntegral (snd windowSize `div` 4)
+    maxHeight = fromIntegral $ snd windowSize `div` 4
+
+    extraJumpHeight :: Double
+    extraJumpHeight = fromIntegral $ snd windowSize `div` 16
 
     startPos :: (Double, Double)
-    startPos = (fromIntegral (fst windowSize `div` 4), fromIntegral (snd windowSize `div` 8))
+    startPos = (fromIntegral $ fst windowSize `div` 4, fromIntegral $ snd windowSize `div` 8)
 
-    initDogPicture :: (Double, Double) -> Int -> ObjectPicture
-    initDogPicture (x, y) = Tex (x, y)
+    initPicture :: (Double, Double) -> Int -> ObjectPicture
+    initPicture (x, y) = Tex (x, y)
 
     initDog :: String -> ObjectPicture -> Bool -> (Double, Double) -> (Double, Double) -> Dog
     initDog name pic isAsleep pos speed = object name pic isAsleep pos speed ()
 
-    -- TODO should use dogState in initialization --
-    dog :: Dog
-    dog = initDog "dog" (initDogPicture dogSize 0)  False startPos (0, 0)
+    createDog :: Dog
+    createDog = initDog "dog" (initPicture initDogSize 0)  False startPos (0, 0)
 
     dogCycle :: GameAction ()
     dogCycle = do
         dog <- findObject "dog" "dogGroup"
+        obstacles <- getObjectsFromGroup "obstacleGroup"
         (GameAttribute score isJump dogState) <- getGameAttribute
         (_, vY) <- getObjectSpeed dog
         setObjectCurrentPicture ((dogState + 1) `mod` 4) dog
-        replaceObject dog (updateObjectSize $ getDogSize $ (dogState + 1) `mod` 4)
-        setGameAttribute (GameAttribute score isJump ((dogState + 1) `mod` 4))
-        when (isJump) (handleMotion dog vY)
-        handleCollision
+        replaceObject dog $ updateObjectSize $ getPicSize ((dogState + 1) `mod` 4) dogs
+        setGameAttribute $ GameAttribute score isJump ((dogState + 1) `mod` 4)
+        when isJump $ handleMotion dog vY
+        handleCollision obstacles
 
-    handleCollision :: GameAction ()
-    handleCollision = do
+    handleCollision :: [Obstacle] -> GameAction ()
+    handleCollision (x:xs) = do
         dog <- findObject "dog" "dogGroup"
-        obstacles <- getObjectsFromGroup "obstacleGroup"
-        obstacleCollision <- objectListObjectCollision obstacles dog
-        when
-            (obstacleCollision)
-            (do setObjectSpeed (0, 0) dog
+        obsName <- getObjectName x
+        hasCollided <- objectsCollision x dog
+        when (hasCollided) (handleCollisionHelper dog obsName)
+
+    handleCollisionHelper :: Dog -> String -> GameAction ()
+    handleCollisionHelper dog name = do
+        case name of
+            obstacleName -> do
+                setObjectSpeed (0, 0) dog
+                obstacles <- getObjectsFromGroup "obstacleGroup"
                 stopMovingObs obstacles
-                setGameState GameOver)
+                setGameState GameOver
+            powerUpName -> do
+                (vX, vY) <- getObjectSpeed dog
+                setObjectSpeed (vX, vY - 100) dog
 
     stopMovingObs :: [Obstacle] -> GameAction ()
     stopMovingObs [] = return ()
@@ -86,31 +102,29 @@ module Types(
             | vY > 0 = jumping dog
             | vY < 0 = falling dog
                      
-
     jumping :: Dog -> GameAction ()
     jumping dog = do
         (vX, vY) <- getObjectSpeed dog
         (_, pY) <- getObjectPosition dog
-        if (pY >= maxHeight)
+        if pY >= (maxHeight + extraJumpHeight)
             then reverseYSpeed dog
             else setObjectSpeed (vX, newSpeed vY) dog
             where newSpeed vY
                     | vY - gravity > 0 = vY - gravity
                     | otherwise = vY
 
-
     falling :: Dog -> GameAction ()
     falling dog = do
         (vX, vY) <- getObjectSpeed dog
         (_, pY) <- getObjectPosition dog
-        if (pY <= snd startPos)
+        if pY <= snd startPos
             then stop dog vX
             else setObjectSpeed (vX, vY - gravity) dog
 
     jump :: GameAction ()
     jump = do
         (GameAttribute score _ dogState) <- getGameAttribute
-        setGameAttribute (GameAttribute score True dogState)
+        setGameAttribute $ GameAttribute score True dogState
         dog <- findObject "dog" "dogGroup"
         (vX, vY) <- getObjectSpeed dog
         setObjectSpeed (vX, newSpeed vY) dog
@@ -121,5 +135,5 @@ module Types(
     stop :: Dog -> Double -> GameAction ()
     stop dog vX = do
         (GameAttribute score _ dogState) <- getGameAttribute
-        setGameAttribute (GameAttribute score False dogState)
+        setGameAttribute $ GameAttribute score False dogState
         setObjectSpeed (vX, 0) dog
