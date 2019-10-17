@@ -19,7 +19,7 @@ executable hachi
   main-is:             Main.hs
   other-modules:       Graphics,
                        Types,
-                       Obstacle
+                       Item
   -- other-extensions:    
   build-depends:       base,
                        FunGEn,

@@ -6,7 +6,7 @@ module Main (main) where
 
     import Graphics
     import Types
-    import Obstacle
+    import Item
 
     gameCycle :: GameAction ()
     gameCycle = do
@@ -15,15 +15,15 @@ module Main (main) where
             GameOver -> return ()
             GameCont -> do
                 updateScore
-                (GameAttribute score _ _) <- getGameAttribute
+                (GameAttribute score _ _ _) <- getGameAttribute
                 printOnScreen (show score) TimesRoman24 (1880,1160) 1.0 1.0 1.0
-                obstacleCycle
+                itemCycle
                 dogCycle
 
     updateScore :: GameAction ()
     updateScore = do
-        (GameAttribute score isJump dogState) <- getGameAttribute
-        setGameAttribute (GameAttribute (score + 1) isJump dogState)
+        (GameAttribute score isJump dogState powerUpInfo) <- getGameAttribute
+        setGameAttribute (GameAttribute (score + 1) isJump dogState powerUpInfo)
 
     handlePress :: Modifiers -> Position -> GameAction ()
     handlePress m p = do
@@ -42,12 +42,12 @@ module Main (main) where
 
     main :: IO ()
     main = do
-        obstacles <- createObstacles 1
+        items <- createItems 1
         let winConfig = ((0, 0), windowSize, "hachi")
         let gameMap = textureMap (length pictures - 1) 1920 1200 1920.0 1200.0
         let dogGroup = objectGroup "dogGroup" [createDog]
-        let obstacleGroup = objectGroup "obstacleGroup" obstacles
-        let initAttr = GameAttribute 0 False 0
+        let itemGroup = objectGroup "itemGroup" items
+        let initAttr = GameAttribute 0 False 0 (PowerUpInfo False NoPower (-1))
         let input = [(MouseButton LeftButton, Press, handlePress),
                      (MouseButton LeftButton, StillDown, handleLongPress)]
-            in funInit winConfig gameMap [dogGroup, obstacleGroup] GameCont initAttr input gameCycle (Timer 100) pictures
+            in funInit winConfig gameMap [dogGroup, itemGroup] GameCont initAttr input gameCycle (Timer 60) pictures

@@ -5,8 +5,9 @@ module Types(
     GameAttribute(GameAttribute),
     Dog,
     maxHeight,
-    Obstacle,
-    PowerUp,
+    Item,
+    PowerUpInfo(PowerUpInfo),
+    PowerUp(JumpPower, NoClipPower, NoPower),
     createDog,
     initPicture,
     windowSize,
@@ -20,11 +21,31 @@ module Types(
 
     type Dog = GameObject ()
 
-    type Obstacle = GameObject ()
+    type Item = GameObject ()
 
-    type PowerUp = GameObject ()
+    {- GameAttribute is one of:
+        - score: Int, current score of the current game session
+        - isJump: Bool, whether we are currently in the midst of jumping
+        - dogState: Int, which dog state (in terms of sprite) we are in
+        - powerUpInfo: PowerUpInfo
+    -}
+    data GameAttribute = GameAttribute Int Bool Int PowerUpInfo
 
-    data GameAttribute = GameAttribute Int Bool Int
+    {- PowerUpInfo consists of:
+        - Bool: whether we have hit a power up
+        - PowerUp: the power up
+        - Int: duration of the power up
+     -}
+    data PowerUpInfo = PowerUpInfo Bool PowerUp Int
+
+    {- PowerUp is one of:
+            - JumpPower
+            - NoClipPower
+        
+        * each power up consists of:
+            - power up value
+    -}
+    data PowerUp = NoPower | JumpPower Int | NoClipPower Int
 
     data GameState = GameOver | GameCont
 
@@ -63,16 +84,20 @@ module Types(
     dogCycle :: GameAction ()
     dogCycle = do
         dog <- findObject "dog" "dogGroup"
-        obstacles <- getObjectsFromGroup "obstacleGroup"
-        (GameAttribute score isJump dogState) <- getGameAttribute
+        items <- getObjectsFromGroup "itemGroup"
+        -- TODO decide if duration is num of cycles vs. num of seconds --
+        (GameAttribute score isJump dogState (PowerUpInfo hasHit powerUp duration)) <- getGameAttribute
         (_, vY) <- getObjectSpeed dog
-        setObjectCurrentPicture ((dogState + 1) `mod` 4) dog
-        replaceObject dog $ updateObjectSize $ getPicSize ((dogState + 1) `mod` 4) dogs
-        setGameAttribute $ GameAttribute score isJump ((dogState + 1) `mod` 4)
+        let newDogState = (dogState + 1) `mod` 4
+        setObjectCurrentPicture newDogState dog
+        replaceObject dog $ updateObjectSize $ getPicSize newDogState dogs
+        when (hasHit && duration > 0) (handlePowerUp dog powerUp)
+        (GameAttribute _ _ _ powerUpInfo) <- getGameAttribute
+        setGameAttribute $ GameAttribute score isJump newDogState powerUpInfo
         when isJump $ handleMotion dog vY
-        handleCollision obstacles
+        handleCollision items
 
-    handleCollision :: [Obstacle] -> GameAction ()
+    handleCollision :: [Item] -> GameAction ()
     handleCollision (x:xs) = do
         dog <- findObject "dog" "dogGroup"
         obsName <- getObjectName x
@@ -82,16 +107,27 @@ module Types(
     handleCollisionHelper :: Dog -> String -> GameAction ()
     handleCollisionHelper dog name = do
         case name of
-            obstacleName -> do
+            "ball" -> do
                 setObjectSpeed (0, 0) dog
-                obstacles <- getObjectsFromGroup "obstacleGroup"
-                stopMovingObs obstacles
+                items <- getObjectsFromGroup "itemGroup"
+                stopMovingObs items
                 setGameState GameOver
-            powerUpName -> do
-                (vX, vY) <- getObjectSpeed dog
-                setObjectSpeed (vX, vY - 100) dog
+            "power" -> do
+                (GameAttribute score isJump dogState (PowerUpInfo _ powerUp duration)) <- getGameAttribute
+                setGameAttribute (GameAttribute score isJump dogState (PowerUpInfo True powerUp duration))
+                 
+    handlePowerUp :: Dog -> PowerUp -> GameAction ()
+    handlePowerUp dog powerUp = do
+        (GameAttribute score isJump dogState (PowerUpInfo hasHit powerUp duration)) <- getGameAttribute
+        let newDuration = duration - 1
+        setGameAttribute (GameAttribute score isJump dogState (PowerUpInfo False powerUp newDuration))
+        case powerUp of
+            JumpPower val -> 
+                return ()
+            NoClipPower val ->
+                return ()
 
-    stopMovingObs :: [Obstacle] -> GameAction ()
+    stopMovingObs :: [Item] -> GameAction ()
     stopMovingObs [] = return ()
     stopMovingObs (x:xs) = do
         setObjectSpeed (0, 0) x
@@ -123,8 +159,8 @@ module Types(
 
     jump :: GameAction ()
     jump = do
-        (GameAttribute score _ dogState) <- getGameAttribute
-        setGameAttribute $ GameAttribute score True dogState
+        (GameAttribute score _ dogState powerUpInfo) <- getGameAttribute
+        setGameAttribute $ GameAttribute score True dogState powerUpInfo
         dog <- findObject "dog" "dogGroup"
         (vX, vY) <- getObjectSpeed dog
         setObjectSpeed (vX, newSpeed vY) dog
@@ -134,6 +170,6 @@ module Types(
 
     stop :: Dog -> Double -> GameAction ()
     stop dog vX = do
-        (GameAttribute score _ dogState) <- getGameAttribute
-        setGameAttribute $ GameAttribute score False dogState
+        (GameAttribute score _ dogState powerUpInfo) <- getGameAttribute
+        setGameAttribute $ GameAttribute score False dogState powerUpInfo
         setObjectSpeed (vX, 0) dog
