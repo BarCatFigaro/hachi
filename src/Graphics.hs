@@ -32,10 +32,10 @@ module Graphics where
 
     obstacles :: [InternalPicture]
     obstacles = [
-        ("./assets/dog/tile004.bmp", magenta, (30, 30)),
-        ("./assets/dog/tile004.bmp", magenta, (30, 30)),
-        ("./assets/dog/tile004.bmp", magenta, (30, 30)),
-        ("./assets/dog/tile004.bmp", magenta, (30, 30))]
+        ("./assets/objects/tile379.bmp", magenta, (30, 30)),
+        ("./assets/objects/tile379.bmp", magenta, (30, 30)),
+        ("./assets/objects/tile379.bmp", magenta, (30, 30)),
+        ("./assets/objects/tile379.bmp", magenta, (30, 30))]
 
     powerUps :: [InternalPicture]
     powerUps = [
