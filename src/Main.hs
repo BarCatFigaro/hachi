@@ -12,12 +12,12 @@ module Main (main) where
     gameCycle :: GameAction ()
     gameCycle = do
         gameState <- getGameState
+        (GameAttribute score _ _ _) <- getGameAttribute
+        printOnScreen (show score) TimesRoman24 (1880,1160) 1.0 1.0 1.0
         case gameState of
             GameOver -> return ()
             GameCont -> do
                 updateScore
-                (GameAttribute score _ _ _) <- getGameAttribute
-                printOnScreen (show score) TimesRoman24 (1880,1160) 1.0 1.0 1.0
                 itemCycle
                 dogCycle
 
