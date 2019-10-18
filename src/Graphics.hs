@@ -32,17 +32,17 @@ module Graphics where
 
     obstacles :: [InternalPicture]
     obstacles = [
-        ("./assets/objects/tile379.bmp", magenta, (30, 30)),
-        ("./assets/objects/tile379.bmp", magenta, (30, 30)),
-        ("./assets/objects/tile379.bmp", magenta, (30, 30)),
-        ("./assets/objects/tile379.bmp", magenta, (30, 30))]
+        ("./assets/objects/tile379.bmp", magenta, (45, 45)),
+        ("./assets/objects/tile379.bmp", magenta, (45, 45)),
+        ("./assets/objects/tile379.bmp", magenta, (45, 45)),
+        ("./assets/objects/tile379.bmp", magenta, (45, 45))]
 
     powerUps :: [InternalPicture]
     powerUps = [
-        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30)),
-        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30)),
-        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30)),
-        ("./assets/dog/dog_forward_1.bmp", magenta, (30, 30))]
+        ("./assets/objects/tile026.bmp", magenta, (45, 45)),
+        ("./assets/objects/tile026.bmp", magenta, (45, 45)),
+        ("./assets/objects/tile040.bmp", magenta, (45, 45)),
+        ("./assets/objects/tile040.bmp", magenta, (45, 45))]
 
     getPicSize :: Int -> [InternalPicture] -> (Double, Double)
     getPicSize idx pics =

@@ -4,9 +4,10 @@ module Main (main) where
 
     import Graphics.UI.Fungen
 
+    import Dog
+    import Item
     import Graphics
     import Types
-    import Item
 
     gameCycle :: GameAction ()
     gameCycle = do
@@ -42,12 +43,12 @@ module Main (main) where
 
     main :: IO ()
     main = do
-        items <- createItems 1
+        item <- createItem
         let winConfig = ((0, 0), windowSize, "hachi")
         let gameMap = textureMap (length pictures - 1) 1920 1200 1920.0 1200.0
         let dogGroup = objectGroup "dogGroup" [createDog]
-        let itemGroup = objectGroup "itemGroup" items
+        let itemGroup = objectGroup "itemGroup" [item]
         let initAttr = GameAttribute 0 False 0 (PowerUpInfo False NoPower (-1))
         let input = [(MouseButton LeftButton, Press, handlePress),
                      (MouseButton LeftButton, StillDown, handleLongPress)]
-            in funInit winConfig gameMap [dogGroup, itemGroup] GameCont initAttr input gameCycle (Timer 60) pictures
+            in funInit winConfig gameMap [dogGroup, itemGroup] GameCont initAttr input gameCycle (Timer 100) pictures
