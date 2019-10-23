@@ -63,7 +63,7 @@ module Item where
             speed score = (initItemSpeed - score / speedStepper, 0)
             modN n = n `mod` (length obstacles)
 
-    -- createPowerUp creates a new powerup with a rancomized Y position
+    -- createPowerUp creates a new powerup with a randomized Y position
     -- score the current score of the game
     createPowerUp :: Double -> GameAction Item
     createPowerUp score = do
@@ -110,7 +110,7 @@ module Item where
         reinitItem x
         reinitItems xs
 
-    -- itemCycle gets all currently loaded items from the game to destory them and generate new items
+    -- itemCycle gets all currently loaded items from the game to destroy them and generate new items
     itemCycle :: GameAction ()
     itemCycle = do
         items <- getObjectsFromGroup "itemGroup"
