@@ -39,7 +39,7 @@ module Dog where
     createDog :: Dog
     createDog = initDog "dog" (initPicture dogSize 0)  False startPos (0, 0)
 
-    -- dogCycle handles all actions in a cycle of the game
+    -- dogCycle handles all actions relating to dog, jumps and collisions
     dogCycle :: GameAction ()
     dogCycle = do
         dog <- findObject "dog" "dogGroup"
@@ -140,7 +140,7 @@ module Dog where
             then stop dog vX
             else setObjectSpeed (vX, vY - gravity) dog
 
-    -- jump updates the dog's state of jumping or falling and the effects of gravity on the motion
+    -- jump initializes the jumping motion of the dog if not already jumping
     jump :: GameAction ()
     jump = do
         (GameAttribute score _ dogState powerUpInfo) <- getGameAttribute

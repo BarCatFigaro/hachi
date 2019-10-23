@@ -12,10 +12,12 @@ module Graphics where
     colour :: Int -> Int -> Int -> InvList
     colour r g b = Just [(r, g, b)]
     
-    -- magenta is the colour magenta; type InvList
+    -- magenta is the colour magenta
+    magenta :: InvList
     magenta = colour 255 0 255
 
     -- pictures is a list of all the sprites used in hachi
+    pictures :: [InternalPicture]
     pictures = [
         getPicture 0 dogs,
         getPicture 1 dogs,
