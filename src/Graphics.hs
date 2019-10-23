@@ -17,7 +17,7 @@ module Graphics where
     magenta = colour 255 0 255
 
     -- pictures is a list of all the sprites used in hachi
-    pictures :: [InternalPicture]
+    pictures :: [(FilePath, InvList)]
     pictures = [
         getPicture 0 dogs,
         getPicture 1 dogs,

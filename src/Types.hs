@@ -66,4 +66,4 @@ module Types where
     -- x the size of the picture
     -- y the index of the picture in pictures (from Graphics.hs)
     initPicture :: (Double, Double) -> Int -> ObjectPicture
-    initPicture x y = Tex (x, y)
+    initPicture (x, y) = Tex (x, y)
