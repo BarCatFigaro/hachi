@@ -71,10 +71,10 @@ module Dog where
     -- item represents the item colliding with the dog
     handleCollisionHelper :: Dog -> String -> Item -> GameAction ()
     handleCollisionHelper dog name item = do
-        (GameAttribute _ _ _ (PowerUpInfo hasHit powerUp _)) <- getGameAttribute
+        (GameAttribute _ _ _ (PowerUpInfo hasHit powerUp duration)) <- getGameAttribute
         case name of
             "ball" -> do
-                if (hasHit && powerUp == NoClipPower)
+                if (hasHit && powerUp == NoClipPower && duration > 0)
                     then setGameState GameCont
                     else do
                         setObjectSpeed (0, 0) dog
