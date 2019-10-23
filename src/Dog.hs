@@ -18,6 +18,10 @@ module Dog where
     gravity :: Double
     gravity = 0.1
 
+    -- jumpHeightMultiplier multiplies the jump height factor; used in JumpPower
+    jumpHeightMultiplier :: Num a => a
+    jumpHeightMultiplier = 3
+
     -- extraJumpHeight the maximum height a jumping dog can reach on the screen
     extraJumpHeight :: Double
     extraJumpHeight = fromIntegral $ snd windowSize `div` 16
@@ -124,7 +128,7 @@ module Dog where
             else setObjectSpeed (vX, newSpeed vY) dog
             where
                 jumpHeight hasHit powerUp
-                    | hasHit && powerUp == JumpPower = 3 * extraJumpHeight
+                    | hasHit && powerUp == JumpPower = jumpHeightMultiplier * extraJumpHeight
                     | otherwise = extraJumpHeight
                 newSpeed vY
                     | vY - gravity > 0 = vY - gravity
