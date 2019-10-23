@@ -28,14 +28,26 @@ module Types where
             - JumpPower
             - NoClipPower
     -}
-    data PowerUp = NoPower | JumpPower | NoClipPower
+    data PowerUp = NoPower | JumpPower | NoClipPower deriving Eq
 
     data GameState = GameOver | GameCont
 
     type GameAction a = IOGame GameAttribute () GameState () a
 
+    windowSizeX :: Int
+    windowSizeX = 1920
+
+    windowSizeY :: Int
+    windowSizeY = 1200
+
+    mapWidth :: Double
+    mapWidth = fromIntegral windowSizeX
+
+    mapHeight :: Double
+    mapHeight = fromIntegral windowSizeY
+
     windowSize :: (Int, Int)
-    windowSize = (1920, 1200)
+    windowSize = (windowSizeX, windowSizeY)
 
     maxHeight :: Double
     maxHeight = fromIntegral $ snd windowSize `div` 4
