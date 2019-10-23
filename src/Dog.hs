@@ -31,10 +31,9 @@ module Dog where
     dogCycle = do
         dog <- findObject "dog" "dogGroup"
         items <- getObjectsFromGroup "itemGroup"
-        -- TODO decide if duration is num of cycles vs. num of seconds --
         (GameAttribute score isJump dogState (PowerUpInfo hasHit powerUp duration)) <- getGameAttribute
         (_, vY) <- getObjectSpeed dog
-        let newDogState = (dogState + 1) `mod` 4
+        let newDogState = (dogState + 1) `mod` (length dogs)
         setObjectCurrentPicture newDogState dog
         replaceObject dog $ updateObjectSize $ getPicSize newDogState dogs
         when (hasHit && duration > 0) (handlePowerUp dog powerUp)
@@ -53,16 +52,20 @@ module Dog where
 
     handleCollisionHelper :: Dog -> String -> Item -> GameAction ()
     handleCollisionHelper dog name item = do
+        (GameAttribute _ _ _ (PowerUpInfo hasHit powerUp _)) <- getGameAttribute
         case name of
             "ball" -> do
-                setObjectSpeed (0, 0) dog
-                items <- getObjectsFromGroup "itemGroup"
-                stopMovingObs items
-                setGameState GameOver
+                if (hasHit && powerUp == NoClipPower)
+                    then setGameState GameCont
+                    else do
+                        setObjectSpeed (0, 0) dog
+                        items <- getObjectsFromGroup "itemGroup"
+                        stopMovingObs items
+                        setGameState GameOver
             "power" -> do
                 destroyObject item
-                item <- liftIOtoIOGame createItem
-                addObjectsToGroup [item] "itemGroup"                
+                newItem <- createItem
+                addObjectsToGroup [newItem] "itemGroup"                
                 (GameAttribute score isJump dogState (PowerUpInfo _ powerUp duration)) <- getGameAttribute
                 setGameAttribute (GameAttribute score isJump dogState (PowerUpInfo True powerUp duration))
                  
@@ -70,13 +73,6 @@ module Dog where
     handlePowerUp dog powerUp = do
         (GameAttribute score isJump dogState (PowerUpInfo _ powerUp duration)) <- getGameAttribute
         setGameAttribute (GameAttribute score isJump dogState (PowerUpInfo (duration > 0) powerUp (duration - 1)))
-        case powerUp of
-            JumpPower -> 
-                return ()
-            NoClipPower ->
-                return ()
-            NoPower ->
-                return ()
 
     stopMovingObs :: [Item] -> GameAction ()
     stopMovingObs [] = return ()
@@ -93,10 +89,15 @@ module Dog where
     jumping dog = do
         (vX, vY) <- getObjectSpeed dog
         (_, pY) <- getObjectPosition dog
-        if pY >= (maxHeight + extraJumpHeight)
+        (GameAttribute _ _ _ (PowerUpInfo hasHit powerUp _)) <- getGameAttribute
+        if pY >= (maxHeight + jumpHeight hasHit powerUp)
             then reverseYSpeed dog
             else setObjectSpeed (vX, newSpeed vY) dog
-            where newSpeed vY
+            where
+                jumpHeight hasHit powerUp
+                    | hasHit && powerUp == JumpPower = 3 * extraJumpHeight
+                    | otherwise = extraJumpHeight
+                newSpeed vY
                     | vY - gravity > 0 = vY - gravity
                     | otherwise = vY
 
