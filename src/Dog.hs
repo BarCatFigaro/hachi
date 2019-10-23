@@ -74,7 +74,7 @@ module Dog where
         (GameAttribute _ _ _ (PowerUpInfo hasHit powerUp duration)) <- getGameAttribute
         case name of
             "ball" -> do
-                if (hasHit && powerUp == NoClipPower && duration > 0)
+                if (hasHit && powerUp == NoClipPower)
                     then setGameState GameCont
                     else do
                         setObjectSpeed (0, 0) dog
